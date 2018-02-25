@@ -30,21 +30,19 @@ func main() {
 		log.Fatalf("failed to connect to %s: %s", dbURI, err.Error())
 	}
 
-	var str string
+	importer := commands.Importer{Filepath: importCmd, GraphDB: graphdb}
+	topicDetector := commands.TopicDetector{Filepath: topicCmd, GraphDB: graphdb}
+	purger := commands.Purger{GraphDB: graphdb}
+
+	var res string
 	var cmdErr = errors.New("")
 
 	if len(importCmd) > 0 {
-		cmd := commands.Importer{Filepath: importCmd, GraphDB: graphdb}
-		str, cmdErr = cmd.Run()
-
+		res, cmdErr = importer.Run()
 	} else if len(topicCmd) > 0 {
-		cmd := commands.TopicDetector{Filepath: topicCmd, GraphDB: graphdb}
-		str, cmdErr = cmd.Run()
-
+		res, cmdErr = topicDetector.Run()
 	} else if purgeCmd {
-		cmd := commands.Purger{GraphDB: graphdb}
-		str, cmdErr = cmd.Run()
-
+		res, cmdErr = purger.Run()
 	} else {
 		flag.Usage()
 		os.Exit(0)
@@ -53,5 +51,5 @@ func main() {
 	if cmdErr != nil {
 		log.Fatalf("failed to run command: %s", cmdErr.Error())
 	}
-	log.Println(str)
+	log.Println(res)
 }
