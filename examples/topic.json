@@ -1,0 +1,38 @@
+{
+    "events": [
+      {
+        "lemma": "Olympia",
+        "weight": 0.80
+      }
+    ],
+    "geos": [
+      {
+        "lemma": "Berlin",
+        "weight": 0.20
+      }
+    ],
+    "keywords": [
+      {
+        "lemma": "Computer",
+        "weight": 0.01
+      }
+    ],
+    "orgs": [
+      {
+        "lemma": "UNO",
+        "weight": 0.01
+      }
+    ],
+    "persons": [
+      {
+        "lemma": "Angela Merkel",
+        "weight": 0.2
+      }
+    ],
+    "products": [
+      {
+        "lemma": "Audi 80",
+        "weight": 0.1
+      }
+    ]
+  } 

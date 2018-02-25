@@ -1,46 +1,55 @@
 package main
 
 import (
+	"errors"
 	"flag"
-	"fmt"
 	"log"
-	"strings"
+	"os"
 
-	"github.com/jmcvetta/neoism"
+	"github.com/co0p/neo4ipool/commands"
+	"github.com/co0p/neo4ipool/neo4j"
 )
 
-var dbURL string
-var dbPassword string
-var dbUser string
+var (
+	dbURI, importCmd, topicCmd string
+	purgeCmd                   bool
+)
 
 func init() {
-	flag.StringVar(&dbURL, "url", "", "url location of neo4j db")
-	flag.StringVar(&dbUser, "username", "", "username of db")
-	flag.StringVar(&dbPassword, "password", "", "password of db")
+	flag.StringVar(&dbURI, "uri", "http://neo:neo@localhost:7474/db/data", "uri of neo4j location, like https://<user>:<pwd>@host:port")
+	flag.StringVar(&importCmd, "import", "", "path to json file for import")
+	flag.StringVar(&topicCmd, "topic", "", "path to json file to detect topic for")
+	flag.BoolVar(&purgeCmd, "purge", false, "if true, it will delete all data")
 }
 
 func main() {
 	flag.Parse()
 
-	if len(dbURL) == 0 {
-		log.Fatalln("usage: go run main.go -url <neo4j url> -user <user> -password <password>")
-	}
-
-	fmt.Println("I AM a cli!")
-
-	data := []string{"https://", dbUser, ":", dbPassword, "@", dbURL}
-	urlWithCredentials := strings.Join(data, "")
-	db, err := neoism.Connect(urlWithCredentials)
-
+	_, err := neo4j.Connect(dbURI)
 	if err != nil {
-		log.Fatalf("failed to connect to db: %s", err.Error())
+		log.Fatalf("failed to connect to %s: %s", dbURI, err.Error())
 	}
 
-	n, err := db.CreateNode(neoism.Props{"name": "Captain Kirk"})
-	if err != nil {
-		log.Printf("failed to create node: %s", err.Error())
+	var str string
+	var cmd string
+	var cmdErr = errors.New("")
+
+	if len(importCmd) > 0 {
+		cmd = "import"
+		str, cmdErr = commands.Import(importCmd)
+	} else if len(topicCmd) > 0 {
+		cmd = "topic"
+		str, cmdErr = commands.DetectTopic(topicCmd)
+	} else if purgeCmd {
+		cmd = "purge"
+		str, cmdErr = commands.Purge()
+	} else {
+		flag.Usage()
+		os.Exit(0)
 	}
 
-	name, _ := n.Property("name")
-	log.Printf("CREATED NODE with name: %s\n", name)
+	if cmdErr != nil {
+		log.Fatalf("failed to run %s command: %s", cmd, cmdErr.Error())
+	}
+	log.Println(str)
 }

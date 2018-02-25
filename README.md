@@ -1,22 +1,25 @@
 neo4ipool
 =========
 
-Provide topic detection and other insights based on entities and their relationships on news articles.
+Provide topic detection of news articles based on entities and their relationships.
 
-We want to answer the following questions: 
- - WHO writes about a given TOPIC (easy)
- - which TOPIC belongs to a given article with percentage and why (hard)
+commands
+--------
 
-The following topics should be supported:
- - Healthcare
- - Science
- - History
- - Culture
- - Economy
- - Sports
- - Politics
+ * ```./neo4ipool -import <path/to/import/json>``` will extract nodes and their relationships and create them in the db
+ * ```./neo4ipool -purge``` will remove any data found in the database
+ * ```./neo4ipool -topic <path/to/entities>``` will suggest any detected topics based on the entities
+ 
+For examples of the json files please look in the examples folder.
+ 
 
- Boostrap data:
- -------------
 
- for our initial graph we use news articles associated with topics. 
+installation
+------------
+
+You need to have **go** and go's **dep tool** installed. 
+
+    go get -v https://github.com/co0p/neo4ipool
+    dep ensure
+    go build
+    ./neo4ipool # will run the binary
