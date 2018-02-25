@@ -25,31 +25,33 @@ func init() {
 func main() {
 	flag.Parse()
 
-	_, err := neo4j.Connect(dbURI)
+	graphdb, err := neo4j.Connect(dbURI)
 	if err != nil {
 		log.Fatalf("failed to connect to %s: %s", dbURI, err.Error())
 	}
 
 	var str string
-	var cmd string
 	var cmdErr = errors.New("")
 
 	if len(importCmd) > 0 {
-		cmd = "import"
-		str, cmdErr = commands.Import(importCmd)
+		cmd := commands.Importer{Filepath: importCmd, GraphDB: graphdb}
+		str, cmdErr = cmd.Run()
+
 	} else if len(topicCmd) > 0 {
-		cmd = "topic"
-		str, cmdErr = commands.DetectTopic(topicCmd)
+		cmd := commands.TopicDetector{Filepath: topicCmd, GraphDB: graphdb}
+		str, cmdErr = cmd.Run()
+
 	} else if purgeCmd {
-		cmd = "purge"
-		str, cmdErr = commands.Purge()
+		cmd := commands.Purger{GraphDB: graphdb}
+		str, cmdErr = cmd.Run()
+
 	} else {
 		flag.Usage()
 		os.Exit(0)
 	}
 
 	if cmdErr != nil {
-		log.Fatalf("failed to run %s command: %s", cmd, cmdErr.Error())
+		log.Fatalf("failed to run command: %s", cmdErr.Error())
 	}
 	log.Println(str)
 }
