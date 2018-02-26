@@ -8,15 +8,11 @@ type Purger struct {
 	GraphDB neo4j.GraphDB
 }
 
-func (p Purger) Run() (string, error) {
+func (p *Purger) Run() (string, error) {
 
-	// parse json
+	if err := p.GraphDB.Purge(); err != nil {
+		return "", err
+	}
 
-	// create nodes
-
-	// create references
-
-	// push into db
-
-	return "", nil
+	return "Successful purged all data", nil
 }

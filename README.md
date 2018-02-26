@@ -21,5 +21,5 @@ You need to have **go** and go's **dep tool** installed.
 
     go get -v https://github.com/co0p/neo4ipool
     dep ensure
-    go build
-    ./neo4ipool # will run the binary
+    go build cmd/neo4ipool/neo4ipool.go
+    ./neo4ipool # run the binary ...

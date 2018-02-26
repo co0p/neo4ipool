@@ -2,23 +2,45 @@ package commands
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 
 	"github.com/co0p/neo4ipool/neo4j"
 )
+
+type entry struct {
+	Category    string      `json:"category"`
+	Linguistics linguistics `json:"linguistics"`
+}
+
+type linguistics struct {
+	Events   []linguisticsEntry `json:"events"`
+	Geos     []linguisticsEntry `json:"geos"`
+	Keywords []linguisticsEntry `json:"keywords"`
+	Orgs     []linguisticsEntry `json:"orgs"`
+	Persons  []linguisticsEntry `json:"persons"`
+}
+
+type linguisticsEntry struct {
+	Lemma  string   `json:"lemma"`
+	Token  []string `json:"token"`
+	Weight float32  `json:"weight"`
+}
 
 type Importer struct {
 	Filepath string
 	GraphDB  neo4j.GraphDB
 }
 
-func (i Importer) Run() (string, error) {
+func (i *Importer) Run() (string, error) {
 
 	// parse json
-	_, err := parseJSON(i.Filepath)
+	parsedEntries, err := i.parseJSON()
 	if err != nil {
 		return "", err
 	}
+
+	log.Printf("found %d entries in '%s'", len(parsedEntries), i.Filepath)
 
 	// create nodes
 
@@ -29,19 +51,16 @@ func (i Importer) Run() (string, error) {
 	return "", nil
 }
 
-type importData struct {
-}
-
-func parseJSON(filePath string) (importData, error) {
-	in, err := os.Open(filePath)
+func (i Importer) parseJSON() ([]entry, error) {
+	in, err := os.Open(i.Filepath)
 	if err != nil {
-		return importData{}, err
+		return nil, err
 	}
 
-	var parsed importData
+	var parsed []entry
 	jsonParser := json.NewDecoder(in)
 	if err = jsonParser.Decode(&parsed); err != nil {
-		return importData{}, err
+		return nil, err
 	}
 	return parsed, nil
 }
