@@ -5,10 +5,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/co0p/neo4ipool"
 	"github.com/co0p/neo4ipool/graphdb"
 )
 
 type entry struct {
+	ArticleID   string      `json:"id"`
 	Category    string      `json:"category"`
 	Linguistics linguistics `json:"linguistics"`
 }
@@ -40,10 +42,35 @@ func (i *Import) Run() error {
 		return err
 	}
 
-	log.Printf("found %d entries in '%s'", len(parsedEntries), i.Filepath)
+	articles := []neo4ipool.Node{}
+	categories := []neo4ipool.Node{}
+	belongsTos := []neo4ipool.Relationship{}
 
 	// create nodes
+	for _, v := range parsedEntries {
+		article := newNode(neo4ipool.Article, v.ArticleID)
+		category := newNode(neo4ipool.Category, v.Category)
+		belongsTo := newRelationship(neo4ipool.BelongsTo, article, category)
 
+		articles = append(articles, article)
+		categories = append(categories, category)
+		belongsTos = append(belongsTos, belongsTo)
+	}
+
+	if err := i.GraphDB.CreateNodes(neo4ipool.Article, articles); err != nil {
+		return err
+	}
+	log.Printf("created %d articles", len(articles))
+
+	if err := i.GraphDB.CreateNodes(neo4ipool.Category, categories); err != nil {
+		return err
+	}
+	log.Printf("created %d categories", len(categories))
+
+	if err := i.GraphDB.CreateRelationships(neo4ipool.BelongsTo, belongsTos); err != nil {
+		return err
+	}
+	log.Printf("created %d belongTo relationships", len(belongsTos))
 	// create references
 
 	// push into db
@@ -63,4 +90,12 @@ func (i Import) parseJSON() ([]entry, error) {
 		return nil, err
 	}
 	return parsed, nil
+}
+
+func newNode(t neo4ipool.NodeType, n string) neo4ipool.Node {
+	return neo4ipool.Node{Type: t, Name: n}
+}
+
+func newRelationship(t neo4ipool.RelationshipType, from neo4ipool.Node, to neo4ipool.Node) neo4ipool.Relationship {
+	return neo4ipool.Relationship{Type: t, From: from, To: to}
 }

@@ -1,5 +1,6 @@
 [
       {
+        "id": "article1",
         "category": "pl",
         "linguistics": {
           "events": [
@@ -52,6 +53,8 @@
           ]
         }
       }, {   
+        "id": "article2",
+
         "category": "pl",
         "linguistics": {
           "events": [],
@@ -122,6 +125,8 @@
         }
       },
       {
+        "id": "article3",
+
         "category": "sp",
         "linguistics": {
           "events": [],
@@ -323,6 +328,8 @@
                 }
       },
       {
+        "id": "article4",
+
         "category": "pl",
         "linguistics": {
           "events": [],
@@ -369,6 +376,8 @@
         }
       },
       {
+        "id": "article5",
+
         "category": "pl",
         "linguistics": {
           "events": [
@@ -510,6 +519,8 @@
         }
       },
       {
+        "id": "article6",
+
         "category": "sp",
         "linguistics": {
           "events": [
@@ -628,8 +639,9 @@
           ]
         }
       },
-     
       {
+        "id": "article7",
+
         "category": "sp",
         "linguistics": {
           "events": [

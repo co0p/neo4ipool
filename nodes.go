@@ -1,6 +1,16 @@
 package neo4ipool
 
+type NodeType string
+
+const (
+	Article  NodeType = "Article"
+	Event    NodeType = "Event"
+	Location NodeType = "Location"
+	Person   NodeType = "Person"
+	Category NodeType = "Category"
+)
+
 type Node struct {
-	Type string
+	Type NodeType
 	Name string
 }

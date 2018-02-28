@@ -23,3 +23,12 @@ You need to have **go** and go's **dep tool** installed.
     dep ensure
     go build cmd/neo4ipool/neo4ipool.go
     ./neo4ipool # run the binary ...
+
+
+
+current state
+-------------
+
+Currently the nodes __article__ and __cateogory__ are supported. They are connected with the relationship __belongs_to__. Parsing a json with 100 articles and creating the graph currently takes about 1 second on my 1.6 Ghz machine.
+
+![Image Alt](https://raw.github.com/co0p/neo4ipool/raw/master/docs/articles_belong_to_categories.png)
