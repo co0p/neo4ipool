@@ -1,4 +1,4 @@
-package neo4j
+package graphdb
 
 import (
 	"github.com/co0p/neo4ipool"

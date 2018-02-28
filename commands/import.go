@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/co0p/neo4ipool/neo4j"
+	"github.com/co0p/neo4ipool/graphdb"
 )
 
 type entry struct {
@@ -27,17 +27,17 @@ type linguisticsEntry struct {
 	Weight float32  `json:"weight"`
 }
 
-type Importer struct {
+type Import struct {
 	Filepath string
-	GraphDB  neo4j.GraphDB
+	GraphDB  *graphdb.GraphDB
 }
 
-func (i *Importer) Run() (string, error) {
+func (i *Import) Run() error {
 
 	// parse json
 	parsedEntries, err := i.parseJSON()
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	log.Printf("found %d entries in '%s'", len(parsedEntries), i.Filepath)
@@ -48,10 +48,10 @@ func (i *Importer) Run() (string, error) {
 
 	// push into db
 
-	return "", nil
+	return nil
 }
 
-func (i Importer) parseJSON() ([]entry, error) {
+func (i Import) parseJSON() ([]entry, error) {
 	in, err := os.Open(i.Filepath)
 	if err != nil {
 		return nil, err
