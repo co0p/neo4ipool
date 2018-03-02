@@ -29,6 +29,17 @@ You need to have **go** and go's **dep tool** installed.
 current state
 -------------
 
-Currently the nodes __article__ and __cateogory__ are supported. They are connected with the relationship __belongs_to__. Parsing a json with 100 articles and creating the graph currently takes about 1 second on my 1.6 Ghz machine.
+Currently the following node types are extracted from the json (see examples/articles.json for an example). An __Article__ belongsTo a __Category__ and all other NodeTypes are mentionedIn __Article__.
+```go
+const (
+	Article      NodeType = "Article"
+	Event        NodeType = "Event"
+	Location     NodeType = "Location"
+	Person       NodeType = "Person"
+	Category     NodeType = "Category"
+	Keyword      NodeType = "Keyword"
+	Organisation NodeType = "Organisation"
+)
+```
 
-![graph of nodes](https://raw.githubusercontent.com/co0p/neo4ipool/master/docs/articles_belong_to_categories.png)
+![graph of nodes](https://raw.githubusercontent.com/co0p/neo4ipool/master/docs/articles_with_tags_and_categories.png)

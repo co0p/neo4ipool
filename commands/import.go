@@ -36,18 +36,24 @@ type Import struct {
 
 func (i *Import) Run() error {
 
-	// parse json
-	parsedEntries, err := i.parseJSON()
+	parsedArticles, err := i.parseJSON()
 	if err != nil {
 		return err
 	}
 
 	articles := []neo4ipool.Node{}
 	categories := []neo4ipool.Node{}
-	belongsTos := []neo4ipool.Relationship{}
+	events := []neo4ipool.Node{}
+	locations := []neo4ipool.Node{}
+	keywords := []neo4ipool.Node{}
+	organisations := []neo4ipool.Node{}
+	persons := []neo4ipool.Node{}
 
-	// create nodes
-	for _, v := range parsedEntries {
+	belongsTos := []neo4ipool.Relationship{}
+	mentionedIns := []neo4ipool.Relationship{}
+
+	// construct nodes and relationships
+	for _, v := range parsedArticles {
 		article := newNode(neo4ipool.Article, v.ArticleID)
 		category := newNode(neo4ipool.Category, v.Category)
 		belongsTo := newRelationship(neo4ipool.BelongsTo, article, category)
@@ -55,8 +61,54 @@ func (i *Import) Run() error {
 		articles = append(articles, article)
 		categories = append(categories, category)
 		belongsTos = append(belongsTos, belongsTo)
+
+		for _, e := range v.Linguistics.Events {
+			n := newNode(neo4ipool.Event, e.Lemma)
+			events = append(events, n)
+
+			r := newRelationship(neo4ipool.MentionedIn, n, article)
+			r.Weight = e.Weight
+			mentionedIns = append(mentionedIns, r)
+		}
+
+		for _, e := range v.Linguistics.Geos {
+			n := newNode(neo4ipool.Location, e.Lemma)
+			locations = append(locations, n)
+
+			r := newRelationship(neo4ipool.MentionedIn, n, article)
+			r.Weight = e.Weight
+			mentionedIns = append(mentionedIns, r)
+		}
+
+		for _, e := range v.Linguistics.Keywords {
+			n := newNode(neo4ipool.Keyword, e.Lemma)
+			keywords = append(keywords, n)
+
+			r := newRelationship(neo4ipool.MentionedIn, n, article)
+			r.Weight = e.Weight
+			mentionedIns = append(mentionedIns, r)
+		}
+
+		for _, e := range v.Linguistics.Orgs {
+			n := newNode(neo4ipool.Organisation, e.Lemma)
+			organisations = append(organisations, n)
+
+			r := newRelationship(neo4ipool.MentionedIn, n, article)
+			r.Weight = e.Weight
+			mentionedIns = append(mentionedIns, r)
+		}
+
+		for _, e := range v.Linguistics.Persons {
+			n := newNode(neo4ipool.Person, e.Lemma)
+			persons = append(persons, n)
+
+			r := newRelationship(neo4ipool.MentionedIn, n, article)
+			r.Weight = e.Weight
+			mentionedIns = append(mentionedIns, r)
+		}
 	}
 
+	// Save Nodes
 	if err := i.GraphDB.CreateNodes(neo4ipool.Article, articles); err != nil {
 		return err
 	}
@@ -67,13 +119,41 @@ func (i *Import) Run() error {
 	}
 	log.Printf("created %d categories", len(categories))
 
+	if err := i.GraphDB.CreateNodes(neo4ipool.Event, events); err != nil {
+		return err
+	}
+	log.Printf("created %d events", len(events))
+
+	if err := i.GraphDB.CreateNodes(neo4ipool.Location, locations); err != nil {
+		return err
+	}
+	log.Printf("created %d locations", len(locations))
+
+	if err := i.GraphDB.CreateNodes(neo4ipool.Keyword, keywords); err != nil {
+		return err
+	}
+	log.Printf("created %d keywords", len(keywords))
+
+	if err := i.GraphDB.CreateNodes(neo4ipool.Organisation, organisations); err != nil {
+		return err
+	}
+	log.Printf("created %d organisations", len(organisations))
+
+	if err := i.GraphDB.CreateNodes(neo4ipool.Person, persons); err != nil {
+		return err
+	}
+	log.Printf("created %d persons", len(categories))
+
+	// create references
 	if err := i.GraphDB.CreateRelationships(neo4ipool.BelongsTo, belongsTos); err != nil {
 		return err
 	}
 	log.Printf("created %d belongTo relationships", len(belongsTos))
-	// create references
 
-	// push into db
+	if err := i.GraphDB.CreateRelationships(neo4ipool.MentionedIn, mentionedIns); err != nil {
+		return err
+	}
+	log.Printf("created %d mentionedIn relationships", len(mentionedIns))
 
 	return nil
 }
