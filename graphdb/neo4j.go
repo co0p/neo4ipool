@@ -58,13 +58,14 @@ func (c *GraphDB) CreateRelationships(t neo4ipool.RelationshipType, r []neo4ipoo
 			"from_type": string(v.From.Type),
 			"to":        v.To.Name,
 			"to_type":   string(v.To.Type),
+			"weight":    fmt.Sprintf("%v", v.Weight),
 		}
 		props = append(props, p)
 	}
 
 	stmt := `UNWIND $props AS relationship
 	MATCH (n{name: relationship.from, type: relationship.from_type}), (m{name: relationship.to, type: relationship.to_type})
-	MERGE (n)-[:%s]->(m)
+	MERGE (n)-[:%s {weight: relationship.weight}]->(m)
 	`
 	cq := neoism.CypherQuery{
 		Statement:  fmt.Sprintf(stmt, t),
