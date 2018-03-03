@@ -51,7 +51,7 @@ Fun Cyphers
 common nodes
 -------------
 
-For the articles __article6__ and __article7__, give me all Nodes, that they have in common with the relation __mentioned_in__.
+For the articles __article6__ and __article7__, give me all Nodes, that they have in common with the relationship __mentioned_in__.
 
 ```sql
 MATCH (a1:Article {name:"article6"})<-[r1:mentioned_in]-(n)-[r2:mentioned_in]->(a2:Article {name: "article7"})
@@ -73,9 +73,9 @@ Will give you:
 With this information, we can calculate the similarity:
 
 ```
-				(7.7029176 * 11.521997) + (1.265252 * 1.4625446) + (118.79045 *5.573722)  
-sim(a1,a2) =  -------------------------------------------------------------------------------------------------
-				sqrt(7.7029176^2 + 1.265252^2 + 118.79045^2)   *  sqrt(11.521997^2 + 1.4625446^2 + 5.573722^2)
+				(7.7029176 * 11.521997)  +  (1.265252 * 1.4625446)  +  (118.79045 *5.573722)  
+sim(a1,a2) =  ---------------------------------------------------------------------------------------------
+				sqrt(7.7029176^2 + 1.265252^2 + 118.79045^2) * sqrt(11.521997^2 + 1.4625446^2 + 5.573722^2)
 
 				752.7084248								 752.7084248
 sim(a1,a2) =  ----------------------------------   =   -----------------
@@ -83,3 +83,16 @@ sim(a1,a2) =  ----------------------------------   =   -----------------
 
 
 sim(a1,a2) = 0.490801```
+
+Well, a1 and a2 are not that similar. One could use this approach to add a new relationship between articles such as *similarity*.  
+
+
+```sql
+	MATCH (p1:Article)<-[x:mentioned_in]-(n)-[y:mentioned_in]->(p2:Article)
+	WITH SUM(x.weight * y.weight) AS xyDotProduct,
+	SQRT(REDUCE(xDot = 0.0, a IN COLLECT(x.weight) | xDot + a^2)) AS xLength,
+	SQRT(REDUCE(yDot = 0.0, b IN COLLECT(y.weight) | yDot + b^2)) AS yLength,
+	p1, p2
+	MERGE (p1)-[s:SIMILARITY]-(p2)
+	SET s.similarity = xyDotProduct / (xLength * yLength)
+```
